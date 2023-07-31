@@ -4,4 +4,5 @@ use (
 	./token
 	./lexer
 	./repl
+	./parser
 )
