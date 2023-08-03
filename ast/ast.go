@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"strings"
+	"strconv"
 	
 	"github.com/OlyaIvanovs/interpreter_in_go/token")
 
@@ -70,6 +71,7 @@ type LetStatement struct {
  	 return out.String()
  }
  
+ // Identifier
  type Identifier struct {
  	Token token.Token
  	Value string
@@ -78,6 +80,16 @@ type LetStatement struct {
 func (i *Identifier) expressionNode() {}  
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string { return i.Value }
+
+// Integer Literal
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode() {}  
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) String() string { return strconv.FormatInt(il.Value, 10) }
 
 // Return
 type ReturnStatement struct {
