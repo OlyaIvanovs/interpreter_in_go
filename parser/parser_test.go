@@ -455,6 +455,22 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"3 < 5 == true",	
 			"((3 < 5) == true)",
 		},	
+		{
+			"1 + (2 + 3) + 4",	
+			"((1 + (2 + 3)) + 4)",
+		},
+		{
+			"(5 + 5) * 2",	
+			"((5 + 5) * 2)",
+		},
+		{
+			"-(5 + 5)",	
+			"(-(5 + 5))",
+		},
+		{
+			"!(true == true)",	
+			"(!(true == true))",
+		},
 	}
 	
 	for _, tt := range tests {
@@ -471,3 +487,99 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 }
 
 
+func TestIfExpression(t *testing.T) {
+	input := "if (x < y) { x }"
+	
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParseErrors(t, p)
+	
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body has to have only 1 statement, got=%d", len(program.Statements))
+	}
+	
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got=%T", program.Statements[0])
+	}
+	
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.Expression. got=%T", stmt.Expression)
+	}
+	
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+	
+	if len(exp.Consequence.Statements) != 1 {
+		t.Fatalf("Consequence block has to have only 1 statement, got=%d", len(exp.Consequence.Statements))
+	}
+	
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement, got=%T", exp.Consequence.Statements[0])
+	}
+	
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+	
+	if exp.Alternative != nil {
+		t.Errorf("exp.Alternative.Statement was not nil, got=%+v", exp.Alternative)
+	}
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := "if (x < y) { x } else { y }"
+	
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParseErrors(t, p)
+	
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body has to have only 1 statement, got=%d", len(program.Statements))
+	}
+	
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got=%T", program.Statements[0])
+	}
+	
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.Expression. got=%T", stmt.Expression)
+	}
+	
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+	
+	if len(exp.Consequence.Statements) != 1 {
+		t.Fatalf("Consequence block has to have only 1 statement, got=%d", len(exp.Consequence.Statements))
+	}
+	
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement, got=%T", exp.Consequence.Statements[0])
+	}
+	
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+	
+	if len(exp.Alternative.Statements) != 1 {
+		t.Fatalf("Alternative block has to have only 1 statement, got=%d", len(exp.Alternative.Statements))
+	}
+	
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement, got=%T", exp.Alternative.Statements[0])
+	}
+	
+	if !testIdentifier(t, alternative.Expression, "y") {
+		return
+	}
+}
