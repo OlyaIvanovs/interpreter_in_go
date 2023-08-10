@@ -9,3 +9,4 @@ require (
 
 
 replace github.com/OlyaIvanovs/interpreter_in_go/lexer => ../lexer
+replace github.com/OlyaIvanovs/interpreter_in_go/token => ../token
