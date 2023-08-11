@@ -1,0 +1,6 @@
+github.com/OlyaIvanovs/interpreter_in_go/lexer v0.0.0-20230722074325-ce6002f1be9e h1:OaqPMqIkLj1T5HAMAQbF/GrlFDuMpJrRBYvDkGrrs3s=
+github.com/OlyaIvanovs/interpreter_in_go/lexer v0.0.0-20230722074325-ce6002f1be9e/go.mod h1:V2hU0wDCc0NTcNHCuLAYpGNm/Ku1GOfwcbaWVOe2A4U=
+github.com/OlyaIvanovs/interpreter_in_go/repl v0.0.0-20230809235445-66e52bf284e9 h1:UzwLiP7uOeQl3SK9LzJYxkg0lQfNMMMIVvciaZcCLas=
+github.com/OlyaIvanovs/interpreter_in_go/repl v0.0.0-20230809235445-66e52bf284e9/go.mod h1:/cB+9f09OnxiZjD+1VeEJ7Oxm+ZO+IQZRd6dltXn+pk=
+github.com/OlyaIvanovs/interpreter_in_go/token v0.0.0-20230722074325-ce6002f1be9e h1:gimWQ2NpyceiWTVocje8Rw5Qz0YOb99IQobLgkwxCC8=
+github.com/OlyaIvanovs/interpreter_in_go/token v0.0.0-20230722074325-ce6002f1be9e/go.mod h1:+Aohg/HfDR/A/sYEwnYnC57Ik2dnHPVt+vtWnxfHLJw=

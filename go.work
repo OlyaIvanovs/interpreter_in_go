@@ -1,9 +1,10 @@
-go 1.21
+go 1.21.0
 
 use (
-	./token
-	./lexer
-	./repl
-	./parser
 	./ast
+	./evaluator
+	./lexer
+	./object
+	./parser
+	./repl
 )
