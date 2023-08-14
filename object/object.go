@@ -7,9 +7,9 @@ import (
 type ObjectType string
 
 const (
-	INTEGER_OBG = "INTEGER"
-	BOOLEAN_OBG = "BOOLEAN"
-	NULL_OBG    = "NULL"
+	INTEGER_OBJ = "INTEGER"
+	BOOLEAN_OBJ = "BOOLEAN"
+	NULL_OBJ    = "NULL"
 )
 
 type Object interface {
@@ -27,7 +27,7 @@ func (i *Integer) Inspect() string {
 }
 
 func (i *Integer) Type() ObjectType {
-	return INTEGER_OBG
+	return INTEGER_OBJ
 }
 
 // Boolean
@@ -40,7 +40,7 @@ func (b *Boolean) Inspect() string {
 }
 
 func (b *Boolean)  Type() ObjectType {
-	return BOOLEAN_OBG
+	return BOOLEAN_OBJ
 }
 
 // Null
@@ -51,5 +51,5 @@ func (n *Null) Inspect() string {
 }
 
 func (n *Null) Type() ObjectType {
-	return NULL_OBG
+	return NULL_OBJ
 }
