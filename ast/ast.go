@@ -225,7 +225,6 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
-
 // Function literal
 type FunctionLiteral struct {
 	Token token.Token
