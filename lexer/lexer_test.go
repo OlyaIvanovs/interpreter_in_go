@@ -62,6 +62,8 @@ if (5 < 10) {
 10 != 9;
 "foobar"
 "foo bar"
+[1, 2];
+{"1": "2"};
 `
 
 
@@ -144,7 +146,20 @@ if (5 < 10) {
         {token.SEMICOLON, ";"},
         {token.STRING, "foobar"},
         {token.STRING, "foo bar"},
-        {token.EOF, ""},
+        {token.LBRACKET, "["},
+        {token.INT, "1"},
+        {token.COMMA, ","},
+        {token.INT, "2"},
+        {token.RBRACKET, "]"},
+        {token.SEMICOLON, ";"},
+        // {"1": "2"};
+         {token.LBRACE, "{"},
+         {token.STRING, "1"},
+         {token.COLON, ":"},
+         {token.STRING, "2"},
+         {token.RBRACE, "}"},
+         {token.SEMICOLON, ";"},
+         {token.EOF, ""},
     }
     
     l := New(input)

@@ -21,6 +21,7 @@ const (
 	PRODUCT		// *
 	PREFIX		// -X or !X
 	CALL 		// myFunction(X)
+	INDEX       // array[index]
 )
 
 var precedences = map[token.TokenType]Precedence{
@@ -33,6 +34,7 @@ var precedences = map[token.TokenType]Precedence{
 	token.ASTERISK: PRODUCT,
 	token.SLASH: 	PRODUCT,
 	token.LPAREN:	CALL,
+	token.LBRACKET:	INDEX,
 }
 
 func (p *Parser) curPrecedence() Precedence {
@@ -86,6 +88,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	
@@ -99,6 +103,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 	
 	return p
 }
@@ -230,7 +235,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
-func (p *Parser) parseExpression(precedence Precedence) ast.Expression {	
+func (p *Parser) parseExpression(precedence Precedence) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
@@ -301,32 +306,8 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
-	exp.Arguments = p.parseCallArguments()
+	exp.Arguments = p.parseExpressionList(token.RPAREN)
 	return exp
-}
-
-func (p *Parser) parseCallArguments() []ast.Expression {
-	args := []ast.Expression{}
-	
-	if p.peekTokenIs(token.RPAREN) {
-		p.nextToken()
-		return args
-	}
-	
-	p.nextToken()
-	args = append(args, p.parseExpression(LOWEST))
-	
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
-		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
-	}
-	
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
-	
-	return args
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
@@ -376,6 +357,50 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	return identifiers
 }
 
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	array := &ast.ArrayLiteral{Token: p.curToken}
+	array.Elements = p.parseExpressionList(token.RBRACKET)
+	
+	return array
+}
+
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+	
+	if p.peekTokenIs(end) {
+		p.nextToken()
+		return list
+	}
+	
+	p.nextToken()
+	list = append(list, p.parseExpression(LOWEST))
+	
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+	
+	if !p.expectPeek(end) {
+		return nil
+	}
+	
+	return list
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
+	p.nextToken()
+	
+	exp.Index = p.parseExpression(LOWEST)
+	
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+	
+	return exp
+}
+
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block := &ast.BlockStatement{Token: p.curToken}
 	
@@ -417,6 +442,36 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	
 	lit.Value = value
 	return lit
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression {
+	hash := &ast.HashLiteral{Token: p.curToken}
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+	
+	for !p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		key := p.parseExpression(LOWEST)
+		
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+		
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		
+		hash.Pairs[key] = value
+		
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			return nil
+		}
+	}
+	
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+	
+	return hash
+	
 }
 
 func (p *Parser) expectPeek(t token.TokenType) bool {

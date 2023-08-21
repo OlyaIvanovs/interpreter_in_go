@@ -290,4 +290,60 @@ func (ce *CallExpression) String() string {
 }
 
 
+// Array
+type ArrayLiteral struct {
+	Token token.Token
+	Elements []Expression
+}
+func (al *ArrayLiteral) expressionNode() {}
+func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
+func (al *ArrayLiteral) String() string {
+	var out strings.Builder
+	
+	elements := []string{}
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+	
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+	
+	return out.String()
+}
+
+// Index operator
+type IndexExpression struct {
+	Token token.Token
+	Left  Expression
+	Index Expression
+}
+func (ie *IndexExpression) expressionNode() {}
+func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IndexExpression) String() string { 
+	return fmt.Sprintf("(%s[%s])", ie.Left.String(), ie.Index.String())
+}
+
+// Hash
+type HashLiteral struct {
+	Token token.Token
+	Pairs map[Expression]Expression
+}
+
+func (hl *HashLiteral) expressionNode() {}
+func (hl *HashLiteral) TokenLiteral() string { return hl.Token.Literal }
+func (hl *HashLiteral) String() string {
+	var out strings.Builder
+	
+	pairs := []string{}
+	for key, value := range hl.Pairs {
+		pairs = append(pairs, key.String() + ":" + value.String() )
+	}
+	
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
 
